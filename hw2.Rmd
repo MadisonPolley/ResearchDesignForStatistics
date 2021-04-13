@@ -1,0 +1,315 @@
+---
+title: "STAT 424 HW2 -- Madison Polley"
+subtitle: Fall 2020
+output:
+  pdf_document: default
+  word_document: default
+---
+
+## Instructions
+
+1. Submit your solution on Canvas as a pdf file before *September 25 at 11:59pm*.
+2. Use R for all computation, and include your code. 
+3. We recommend you start with the template `hw2.Rmd` file on Canvas.
+
+## Rubric
+
+* [30 points] One problem below will be graded for,
+  - [15 points] Correctness. Are all parts answered correctly?
+  - [15 points] Clarity. Are all answers justified? For questions with a coding
+  component, is code provided, and is it readable?
+* [20 = 4 * 5 points] Four problems below will be graded on completeness.
+* Total: 50 points
+
+```{r setup, include=FALSE}
+library("tibble")
+library(ggplot2)
+library("DescTools")
+library("broom")
+library("dplyr")
+library("gmodels")
+library("readr")
+library("reshape2")
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problems
+
+**1. [DM 2.17, modified]** The viscosity of a liquid detergent is supposed to
+average 800 centistokes^[Whatever that means.] at 25&deg;. A random sample of 14
+batches of detergent is collected, and the average viscosity is 819. Suppose
+that we know that viscosity is normally distributed and has a standard deviation
+of $\sigma = 24$ centistokes.
+
+  a. State the hypothesis that should be tested.
+  
+  $H_{0} : mu = 800centistokes$
+  $H_{1} : mu > 800centistokes$
+  
+  b. Draw a picture summarizing the data in the problem. 
+  
+```{r}
+dist1 = rnorm(100000, mean=800, sd=24)
+hist(dist1, breaks=150, xlim=c(700,900), freq=FALSE, xlab= "viscosity")
+abline(v=10, lwd=5)
+abline(v=c(800-(24*3),800-(24*2),800-24,800+24,800+(24*2),800+(24*3)), col = "red")
+
+```
+  
+  b. Test these hypotheses using $\alpha = 0.05$. What are your conclusions?
+  
+```{r}
+x.bar = 819
+mu = 800
+pop.sd = 24
+n = 14
+z = ((x.bar - mu)/((pop.sd^2)/sqrt(n)))
+p = pnorm(z, lower.tail = FALSE)
+z
+p
+```
+**With a p value of 0.4508862 and an alpha level of 0.05, we fail to reject the null hypothesis. We do not have sufficient evidence to suggest that the viscosity of the sample is higher than normal.**
+  
+  c. What is the $p$-value for the test?
+  
+$p = 0.4508862$
+  
+  d. Find a 95\% confidence interval for the mean.
+
+```{r}
+qnorm(.05, mean=800, sd = 24)
+qnorm(.95, mean=800, sd = 24)
+```
+**We are 95% confident that the true mean of the data falls between 760.5235 centistokes and 839.4765 centistokes**
+
+**2. [DM 2.27]** Photoresist is a light sensitive material applied to semiconductor
+wafers so that the circuit pattern can be imaged onto the wafer. After
+application, the coated wafers are baked to remove the solvent in the
+photoresist mixture and to harden the resist. Here are measurements of the
+photoresist thickness (in kA) for eight wafers baked at two different
+temperatures. Assume that all of the runs were made in random order.
+
+```{r}
+photoresist <- tibble(
+  "sample_id" = as.factor(seq(8)),
+  "95" = c(11.156, 7.089, 8.097, 11.539, 11.291, 10.799, 6.467, 8.315),
+  "100" = c(5.261, 6.748, 7.461, 7.015, 8.133, 7.438, 3.772, 7.964),
+)
+```
+
+  a. Is there evidence to support the claim that the higher baking temperature
+  results in wafers with a lower mean photoresist thickness? Use $\alpha = 0.05$.
+  
+```{r}
+t.test(photoresist$`100`, photoresist$`95`, alternative = c("less"))
+```
+
+**With a p-value of 0.006246 and an alpha level of 0.05, we reject the null hypothesis. There is significant evidence that the higher baking temperature has a lower photoresist thickness in kA.**
+  
+  b. What is the $p$-value for the test conducted in part (a)?
+  
+  $p = 0.006246$
+  
+  c. Find a 95\% confidence interval on the difference in means. Provide a
+  practical interpretation of this interval.
+  
+```{r}
+t.test(photoresist$`100`, photoresist$`95`)
+```
+
+**The 95% confidence interval is [-4.5719342, -0.6683158]**
+  
+  d. Make a visualization to assist in interpreting the results from this
+  experiment.
+  
+```{r}
+df.new = data.frame(
+                    response=c(photoresist$`95`, photoresist$`100`),
+                    lvl=as.factor(c(rep("95", 8), rep("100", 8))))
+ggplot(df.new, aes(x=response, fill=lvl)) + geom_boxplot()
+```
+
+  
+  e. Check the assumption of normality of the photoresist thickness.
+  
+```{r}
+qqnorm(photoresist$`100`, main = "Normal Q-Q Plot for 100 degrees")
+qqline(photoresist$`100`)
+
+qqnorm(photoresist$`95`, main = "Normal Q-Q Plot for 95 degrees")
+qqline(photoresist$`95`)
+```
+
+  
+  f. Find the power of this test for detecting an actual difference in means of 2.5 kA.
+
+```{r}
+sddiff = sqrt((( sd(photoresist$`100`)^2 )/8) + ((sd(photoresist$`95`)^2)/8))
+
+power.t.test(8, delta = 2.5, sd =sddiff )
+```
+
+**The power of this test is 0.9992558**
+
+
+  g. What sample size would be necessary to detect an actual difference in means
+  of 1.5kA with a power of at least 0.9?
+
+```{r}
+power.t.test(delta = 1.5, sd = sddiff, power = 0.9)
+```
+
+**A sample size of at least 8.672399 per group is required.**
+
+
+
+**3. [DM 3.26, modified]** Four chemists are asked to determine the percentage of
+methyl alcohol in a certain chemical compound. Each chemist makes three
+determinations, and the results are the following:
+
+```{r}
+chemists <- tibble(
+  chemist = factor(c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4), ordered = FALSE),
+  ma = c(84.89, 84.24, 84.18, 85.15, 85.13, 84.88, 84.79, 84.48, 85.16, 84.20, 
+         84.10, 84.55)
+)
+```
+
+  a. Make a plot describing the measurements from the four chemists. Describe
+  what you see.
+  
+```{r}
+ggplot(chemists, aes(x= chemist, y=ma, fill=chemist)) + geom_boxplot()
+```
+
+**It appears that chemist 1 had the widest range of measurements. Chemist 3 had the highest measurement, while chemist 4 had the lowest measurement. Chemist 2 has the smallest range and seems higher than the other chemists. The overall range of measurements was from about 84.1ma to 85.1ma. The center of the measurements appears to be around 84.7ma.**
+  
+  b. Do the chemists differ significantly? Use $\alpha = 0.05$.
+
+```{r}
+modell = lm(chemists$ma~chemists$chemist)
+anova(modell)
+```
+
+**With a p-value of 0.04605 and an alpha value of 0.05, we reject the null hypothesis. At least one of the chemists appear to differ significantly in their measurements.**
+
+  c. Analyze the residuals from this experiment.
+  
+```{r}
+plot(modell$fitted.values, modell$residuals, xlab = c("Fitted values"), ylab = c("Residuals"))
+```
+
+**There appear to be residuals stacked on top of eachother in lines, which means there is a pattern. This shows that the variance is not constant and therefore the homoskedasticity assumption is violated.**
+  
+  d. If chemist 2 is a new employee, construct a meaningful set of orthogonal contrasts that might have been useful at the start of hte experiment.
+  
+```{r}
+aov.modell = aov(modell)
+contrasts <- matrix(
+    c(1, -1, 0, 0,
+      0, -1, 1, 0,
+      0, -1, 0, 1),
+    nrow = 3, byrow = TRUE
+  )
+fit.contrast(aov.modell, "chemists$chemist", contrasts)
+```
+
+  
+**4. [EDMES 1.8]** The computer science department of a university wishes to test
+whether there are differences among three programming texts with respect to how
+long it takes a student completing the text to write a program in C++ language.
+Eight students from an introductory class were randomly assigned each of the
+texts, asked to complete the steps outlined in the text, and then given a
+program to write. The results, in minutes, are shown below.  Conduct a
+one-factor ANOVA to determine if hte texts are equally effective.
+
+
+```{r}
+books <- tibble(
+ book_id = c(rep("1", 8), rep("2", 8), rep("3", 8)),
+ minutes = c(11, 9, 12, 13, 15, 12, 13, 12, 14, 12, 14, 13, 15, 15, 14, 16, 12, 
+             8, 10, 12, 13, 10, 14, 11)
+)
+
+model = lm(books$minutes~books$book_id)
+anova(model)
+```
+
+**With a p-value of 0.006869 and an assumed alpha value of 0.05, we reject the null hypothesis. There is significant evidence suggesting that the texts are not equally effective.**
+
+**5. [DM 3.23]** The response time in millisceonds was determined for three different types of circuits that could be used in an automatic valve shutoff mechanism^[Sounds important, probably should pay attention.]. The results from a completely randomized experiment are shown in the following table.
+
+```{r}
+shutoff <- tibble(
+  "1" = c(9, 12, 10, 9, 14),
+  "2" = c(20, 22, 23, 17, 30),
+  "3" = c(6, 5, 7, 16, 7)
+)
+
+```
+
+  a. Plot the data. You may find it useful to reshape the data into tidy format.
+  
+```{r}
+shutoff.reshaped = data.frame(sample_ID=rep(c(1:5),3),
+                              response=c(shutoff$`1`, shutoff$`2`, shutoff$`3`),
+                              level=as.factor(c(rep(1, 5), rep(2, 5), rep(3, 5))))
+
+ggplot(shutoff.reshaped, aes(x=level, y=response)) + geom_point(aes(col=level))
+```
+
+
+  b. Test the hypothesis that the three circuit types have the same response time. Use $\alpha = 0.01$.
+  
+```{r}
+circuit.model = lm(response~level, shutoff.reshaped)
+anova(circuit.model)
+```
+
+**With a p-value of 0.0002457 and an alpha level of 0.01, we reject the null hypothesis. There is significant evidence that at least one of the circuit types has a different response time.**
+  
+  c. Use Tukey's test to compare pairs of treatment means. Use $\alpha = 0.01$.
+  
+```{r}
+aov.circuit.model = aov(circuit.model)
+TukeyHSD(aov.circuit.model)
+```
+
+**With an alpha level of 0.01, it appears that the differences between circuits 1 and 2 and the differences between circuits 2 and 3 are significant. There is evidence to suggest that circuit 2 is different from circuits 1 and 3.**
+  
+  d. Overlay a 95\% confidence interval for the group means on the plot that you made in part (a).
+
+```{r}
+lower1 = qnorm(.05, mean=mean(shutoff$`1`), sd = sd(shutoff$`1`))
+upper1 = qnorm(.95,mean=mean(shutoff$`1`), sd = sd(shutoff$`1`))
+
+lower2 = qnorm(.05, mean=mean(shutoff$`2`), sd = sd(shutoff$`2`))
+upper2 = qnorm(.95,mean=mean(shutoff$`2`), sd = sd(shutoff$`2`))
+
+lower3 = qnorm(.05, mean=mean(shutoff$`3`), sd = sd(shutoff$`3`))
+upper3 = qnorm(.95,mean=mean(shutoff$`3`), sd = sd(shutoff$`3`))
+
+ggplot(shutoff.reshaped, aes(x=level, y=response)) + geom_segment(aes(x=level, xend=level, y=response, yend=response)) + geom_segment( aes(x=1, xend=1, y = lower1, yend=upper1, color = "level 1 95% conf int")) + geom_segment( aes(x=2, xend=2, y = lower2, yend=upper2, color = "level 2 95% conf int")) + geom_segment( aes(x=3, xend=3, y = lower3, yend=upper3, color = "level 3 95% conf int")) + geom_point(aes(col=level))
+```
+
+
+## Feedback
+
+a. How much time did you spend on this homework?
+
+**3.5 hours**
+
+b. Which problem did you find most valuable?
+
+**I think the part where we found contrasts was helpful because that helped me understand what they were. I'm definitely not sure how to make confidence bands on plots though.**
+
+## References
+
+[DAE] Montgomery, Douglas C. Design and analysis of experiments. John wiley &
+sons, 2017.
+
+[EDMES] Berger, P. D., & Maurer, R. E. (2002). Experimental Design with
+Application in Management, Engineering, and the Sciences. CA (USA): Wadsworth
+Group Belmont. Accessed for free at
+https://search.library.wisc.edu/catalog/991013677228502128.

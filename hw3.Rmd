@@ -1,0 +1,162 @@
+---
+title: "STAT 424 HW3"
+subtitle: "Fall 2020"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+## Instructions
+
+1. Submit your solution on Canvas as a pdf file before *October 9 at 11:59pm*.
+2. Use R for all computation, and include your code. 
+3. We recommend you start with the template `hw3.Rmd` file on Canvas.
+
+## Rubric
+
+* [30 points] One problem below will be graded for,
+  - [15 points] Correctness. Are all parts answered correctly?
+  - [15 points] Clarity. Are all answers justified? For questions with a coding
+  component, is code provided, and is it readable?
+* [20 = 4 * 5 points] Four problems below will be graded on completeness.
+* Total: 50 points
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problems
+
+1. [DAE 3.31] An article in the _Journal of the Electrochemical Society_ (Vol.
+139, No. 2, 1992, pp. 524 - 532) describes an experiment to investigate the
+low-pressure vapor deposition of polysilicon. The experiment was carried out in
+a large-capacity reactor at Sematech in Austin. The reactor has several wafer
+positions, and four of these positions are selected at random. The response
+variable is film thickness uniformity. Three replicates of the experiment were
+run, and the data are as follows.
+
+```{r}
+film <- data.frame(
+  position = as.factor(rep(seq_len(4), each = 3)),
+  thickness = c(2.76, 5.67, 4.49,
+    1.43, 1.70, 2.19,
+    2.34, 1.97, 1.47,
+    0.94, 1.36, 1.65)
+  )
+model = lm(film$thickness~film$position)
+summary(model)
+```
+
+    a. Estimate the variability due to wafer positions.
+    
+  **The estimated variability due to wafer positions is approximately 0.7566**
+    
+    b. Analyze the residuals from this experiment and comment on model adequacy.
+  
+```{r}
+plot(model$residuals)
+```
+
+**Though the residuals seem to be centered around 0, the first two points are quite far from 0. There is also a clear trend that looks similar to a sin wave, making this a bad model.**
+  
+2. [DAE 3.33] A single-factor completely randomized design has four levels of
+the factor. There are three replicates and the total sum of squares is 900.25.
+The treatment sum of squares is 750.50.
+
+    a. What is the estimate of the error variance $\sigma^2$?
+    
+```{r}
+(900.25-750.50)/(12-4)
+```
+
+    
+    b. What proportion of the variability in the response variable is explained by
+    the treatment effect?
+
+```{r}
+750.50/900
+```
+  
+  
+  
+3. [DAE 4.8] Three different washing solutions are being compared to study their
+effectiveness in retarding bacteria growth in 5-gallon milk containers. The
+analysis is done in a laboratory, and only three trials can be run on any day.
+Because days could represent a potential source of variability, the experimenter
+decides to use a randomized block design. Observations are taken for four days,
+and the data are shown here. Analyze the data from this experiment (use $\alpha
+= 0.05$) and draw conclusions.
+
+```{r}
+bacteria <- data.frame(
+  solution = as.factor(rep(seq_len(3), each = 4)),
+  growth = c(13, 22, 18, 39, 
+    16, 24, 17, 44,
+    5, 4, 1, 22),
+  day = c(1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4)
+)
+
+model.bacteria = lm(bacteria$growth~bacteria$solution+bacteria$day)
+anova(model.bacteria)
+```
+
+**With p values of 0.08216 and 0.10094, we fail to reject the null hypothesis. It appears that there is not significant evidence that the solution or the day made significant impact on the bacteria growth.**
+
+4. [DAE 4.25] An industrial engineer is investigating the effect of four
+assembly methods $\left(A, B, C, D\right)$ on the assembly time for a color
+television component. Four operators are selected for the study. Furthermore,
+the engineer knows that each assembly method produces such fatigue that the time
+required for the last assembly may be greater than the time required for the
+first, regardless of the method. That is, a trend develops in the required
+assembly time. To account for this source of variability, the engineer uses the
+Latin Square design that follows. Analyze the data from this experiment ($\alpha
+= 0.05$) and draw appropriate conclusions.
+
+```{r}
+assembly <- data.frame(
+  order = as.factor(rep(seq_len(4), each = 4)),
+  operator = as.factor(rep(seq_len(4), 4)),
+  method = c("C", "D", "A", "B", "B", "C", "D", "A", "A", "B", "C", "D", "D", "A", "B", "C"),
+  time = c(10, 14, 7, 8, 7, 18, 11, 8, 5, 10, 11, 9, 10, 10, 12, 14)
+)
+
+model.assembly = lm(assembly$time~assembly$method+assembly$operator)
+
+anova(model.assembly)
+```
+
+**With a p-value of 0.008064, we reject the null hypothesis. There appears to be significant evidence that the assembly methods have effects on the assembly time.**
+
+5. Consider a randomized complete block design.
+
+    a. In your own words, what does it mean for there to be an interaction between a
+    treatment and the blocks?
+    
+**An interaction between two variables shows that the effect of a treatment changes depending on the level of the interacting variable.**
+  
+    b. Describe one strategy that could be used to detect an interaction between the
+    treatment and the blocks.
+    
+**You can make a model that has interactions included in it and run an ANOVA test. Any variables or interactions with significant p-values are useful in the model. If an interaction variable has a significant p-value, that means there is in fact a relevant interaction.**
+    
+    c. What might be one way you could correct for an interaction effect between a
+    treatment and blocks. You may consider changes either in the analysis or the
+    design.
+  
+**Based on what we learned in Stats 333, we could do a Two Factor ANOVA to just include the interaction effect rather than trying to find a way around the interaction. This way we can make a good statistical model without worrying that it is missing some important information.**
+  
+  
+## Feedback
+
+a. How much time did you spend on this homework?
+
+probably 3 hours??
+
+b. Which problem did you find most valuable?
+
+I liked question 5.
+
+## References
+
+[DAE] Montgomery, Douglas C. Design and analysis of experiments. John wiley &
+sons, 2017.

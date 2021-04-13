@@ -1,0 +1,219 @@
+---
+title: "HW 5"
+author: "Madi Polley"
+date: "11/5/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("dplyr")
+library("ggplot2")
+library("readr")
+library("tufte")
+```
+
+## Problems
+
+1. [DAE 6.17] An experimenter has run a single replicate of a $2^{4}$ design.
+The following effect estimates have been calculated.
+
+```{r}
+effects <- c(
+  "A" = 76.95, "B"= -67.52, "C" = -7.84, "D" = -18.73, "AB" = -51.32, 
+  "AC" = 11.69, "AD" = 9.78, "BC" = 20.78, "BD" = 14.74, "CD" = 1.27, 
+  "ABC" = -2.82, "ABD" = -6.50, "ACD" = 10.20, "BCD" = -7.98, "ABCD" = -6.25
+)
+```
+
+a. Construct a normal probability plot of these effects.
+
+```{r}
+plotted <- function(effects) { 
+  qq <- qqnorm(effects, datax = TRUE)
+  qqline(effects, col = "red", probs = c(0.3, 0.7), datax = TRUE)
+  text(qq$x, qq$y, names(effects), pos=4)
+}
+plotted(effects)
+```
+
+b. Identify a tentative model, based on the plot of the effects in part (a).
+
+**A tentative model for this would likely have the intercept, A, B, and the interation of AB.**
+
+2. [DAE 6.22] A company markets its products by direct mail. An experiment was
+conducted to study the effects of the three factors on the customer response
+rate for a particular product. The three factors are $A = \text{type}$ of mail
+used (3rd class, 1st class), $B = \text{type}$ of descriptive brochure (color,
+black-and-white), and $C = \text{offered}$ price ($19.95, $24.95). The
+mailings are made to two groups of 8000 randomly selected customers, with 1000
+customers in each group receiving each treatment combination. Each group of
+customers is considered as a replicate. The response variable is in the number
+of orders placed. The experimental data are shown in Table P6.4 (in `mail` below).
+
+```{r}
+mail <- data.frame(
+  "run" = seq_len(8),
+  "A" = as.factor(rep(c("-", "+"), 4)), # - is 3rd class, + is 1st class
+  "B" = as.factor(rep(c("-", "-", "+", "+"), 2)), # - is bw, + is color
+  "C" = as.factor(rep(c("-", "+"), each = 4)), # - is $20, + is $25
+  "replicate_1" = c(50, 44, 46, 42, 49, 48, 47, 56),
+  "replicate_2" = c(54, 42, 48, 43, 46, 45, 48, 54)
+)
+```
+
+a. Analyze the data from this experiment. Which factors significantly affect the
+customer response rate?
+
+```{r}
+fit <- lm(run ~ (A + B + C) ^ 2, data = mail)
+anova(fit)
+```
+
+**The factors that significantly affect the customer response rate A, B, and C, with a little interaction effect between B and C.**
+
+b. Analyze the residuals from this experiment. Are there any indications of
+model inadequacy?
+
+```{r}
+resids <- mail %>%
+  mutate(
+    residual = resid(fit),
+    y_hat = predict(fit))
+
+ggplot(resids) +
+  geom_point(aes(x = y_hat, y = residual))
+```
+
+**Nothing here makes the model seem inadequate.** 
+
+c. What would you recommend to the company?
+
+**I would recommend that the company should use first class mail with color a brochure to maximize the average response rate.**
+
+3. [DAE 6.33] Resistivity on a silicon wafer is influenced by several factors.
+The results of a $2^{4}$ factorial experiment performed during a critical
+processing step are shown in Table P6.8 (in `resistivity` below).
+
+```{r}
+resistivity <- data.frame(
+  run = seq_len(16),
+  A = as.factor(rep(c("-", "+"), 8)),
+  B = as.factor(rep(rep(c("-", "+"), each = 2), 4)),
+  C = as.factor(rep(rep(c("-", "+"), each = 4), 2)),
+  D = rep(c("-", "+"), each = 8),
+  resistivity = c(1.92, 11.28, 1.09, 5.75, 2.13, 9.53, 1.03, 5.35, 1.60, 11.73, 1.16, 4.68, 2.16, 9.11, 1.07, 5.30)
+)
+resistivity.effects = c(
+  "1" = 1.92, "A" = 11.28, "B" = 1.09, "AB" = 5.75, 
+  "C"=2.13, "AC"=9.53, "BC"=1.03, "ABC"=5.35, 
+  "D"=1.60, "AD"=11.73, "BD"=1.16, "ABD"=4.68, 
+  "CD"=2.16, "ACD"=9.11, "BCD"=1.07, "ABCD"=5.30)
+```
+
+a. Estimate the factor effects. Plot the effect estimates on a normal
+probability plot and select a tentative model.
+
+```{r}
+fit2 = lm(resistivity ~ (A + B + C) ^ 2, data = resistivity)
+anova(fit2)
+ggplot(resistivity) +
+  geom_point(aes(x = A, y = resistivity, col = C)) +
+  scale_color_brewer(palette = "Set2") +
+  facet_grid(B ~ D)
+plotted(resistivity.effects)
+```
+
+**This model seems like it should use factors A, B, and the interaction of A and B because they are significant. The model should also contain the intercept and the interaction of BC.**
+
+b. Fit the model identified in part (a) and analyze the residuals. Is there any
+indication of model inadequacy?
+
+```{r}
+resistivity_resid2 <- resistivity %>%
+  mutate(
+    residual = resid(fit2),
+    y_hat = predict(fit2))
+
+ggplot(resistivity_resid2) +
+  geom_point(aes(x = y_hat, y = residual))
+```
+
+**The residuals look normal, so the model is likely okay to use.**
+
+c. Repeat the analysis from (a) and (b) using $\ln\left(y\right)$ as the
+response variable. Is there an indication that the transformation has been
+useful?
+
+```{r}
+fit3 = lm(log(resistivity) ~ (A + B + C) ^ 2, data = resistivity)
+anova(fit3)
+
+resistivity_resid3 <- resistivity %>%
+  mutate(
+    residual = resid(fit3),
+    y_hat = predict(fit3))
+
+ggplot(resistivity_resid3) +
+  geom_point(aes(x = y_hat, y = residual))
+```
+
+**Factors A and B are significant. The residuals plot does not seem to have a clear pattern, so there is no model inadequacy.**
+
+4. Consider the problem of choosing a factor combination to maximize a measured
+response. Suppose that the top two factor combinations have estimated
+distributions as in the Figure below. Discuss the tradeoffs involved between
+selecting combination 1 vs. combination 2. In which contexts would 1 be
+preferred, and vice versa?
+
+```{r, echo = FALSE, fig.width = 3.5, fig.height = 2}
+library("ggplot2")
+theme_set(theme_bw())
+
+n_sim <- 10000
+df <- data.frame(
+  combination = rep(c("1", "2"), each = n_sim),
+  response = c(rnorm(n_sim, 8), rnorm(n_sim, 7.5, 0.2))
+)
+ggplot(df) +
+  geom_histogram(
+    aes(x = response, fill = combination),
+    position = position_identity(),
+    binwidth = 0.1,
+    alpha = 0.6
+  ) +
+  scale_fill_brewer(palette = "Set2")
+```
+e
+**This problem is a good example of the bias-variance trade off. Combination 1 has a higher variance but a low bias, wheras Combination 2 has high bias and low variance. You would want Combination one if you wanted to make sure you covered the true mean of your given data, but it is prone to overfitting and is not as generalizable to other data. Combination 2 is preferred if you would like a simple model with a defined mean, even if it is not the true mean. This combination is prone to underfitting the data.**
+
+5. Recall formula 6.20,
+
+\begin{align*}
+\text{se}\left(\text{Effect}\right) &= \frac{2S}{\sqrt{n 2^{K}}}.
+\end{align*}
+Suppose $S = 1$. Plot this formula as (1) a function of $n$ and (2) a function
+of $k$. Discuss the implications for choosing the number of replicates and
+factors in a factorial design. Why is it still generally impossible to estimate
+effect SE's when $n = 1$?
+
+```{r}
+n = seq(0,10,1)
+k = seq(0,10,1)
+plot(n, (2/sqrt(n*2^1)), type="o", ylab="se(Effect)")
+plot(x=k, y=(2/sqrt(2^k)), col="red", type="o", ylab="se(Effect)")
+```
+
+**The SE decreases with increased n as well as with increased k. It seems that the value of n is more important than the value of k in decreasing SE because the plot for n skyrockets toward 0. This points to the idea that it is really hard to estimate SE when n=1 because as seen on the graph, the SE is off the chart vertically near 0.**
+
+## Feedback
+
+a. How much time did you spend on this homework?
+
+About 2 hours
+
+
+b. Which problem did you find most valuable?
+
+I liked the problem showing bias-variance trade off :)
+

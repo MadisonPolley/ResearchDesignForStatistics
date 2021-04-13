@@ -1,0 +1,202 @@
+---
+title: "STAT 424 HW4"
+subtitle: "Fall 2020"
+author: "Madison Polley"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+## Instructions
+
+1. Submit your solution on Canvas as a pdf file before *October 23 at 11:59pm*.
+2. Use R for all computation, and include your code. 
+3. We recommend you start with the template `hw4.Rmd` file on Canvas.
+
+## Rubric
+
+* [30 points] One problem below will be graded for,
+  - [15 points] Correctness. Are all parts answered correctly?
+  - [15 points] Clarity. Are all answers justified? For questions with a coding
+  component, is code provided, and is it readable?
+* [20 = 4 * 5 points] Four problems below will be graded on completeness.
+* Total: 50 points
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Problems
+
+1. [DAE 4.42] An engineer is studying the mileage performance characteristics of
+five types of gasoline additives. Ideally, car type would be used as a blocking
+variable. However, because of time constraints, a complete design is impossible.
+The following balanced design is run,
+
+```{r}
+mileage <- data.frame(
+  additive = rep(1:5, each = 4),
+  car = c(2, 3, 4, 5, 1, 2, 4, 5, 1, 3, 4, 5, 1, 2, 3, 4, 1, 2, 3, 5),
+  mileage = c(17, 14, 13, 12, 14, 14, 13, 10, 12, 13, 12, 9, 14, 11, 11, 12, 11, 12, 10, 8)
+)
+model1 = lm(mileage~car+additive, data= mileage)
+summary(model1)
+anova(model1)
+```
+
+Analyze data from the experiment (at $\alpha = 0.05$ and draw conclusions).
+
+**With p-values that are significant at our chosen alpha level, we reject the null hypothesis. At least one of the variable levels has an effect on the mileage.**
+
+2. [DAE 4.48] An experimenter wishes to compare eight treatments in blocks of
+four runs. Find a BIBD with 14 blocks and $\lambda = 3$.
+
+**a = 8, b = 14, k = 4, r = (k * b)/a = 7, lambda = 3**
+
+ 0     1       2    3    4      5    6     7    8  
+---   ----  ----  ---- -----  ----  ----  ----  ---
+1   |  x            x          x           x 
+2   | x            x                 x          x
+3   | x       x                x      x
+4   | x       x                            x    x
+5   | x       x     x     x
+6   | x                   x          x      x
+7   | x                   x     x                x
+8   |         x          x           x           x
+9   |        x           x      x           x
+10  |        x      x           x                x
+11  |        x      x                x      x
+12  |               x     x                 x    x
+13  |               x     x     x     x
+14  |                           x     x     x    x
+------------------------------------------------------
+
+    
+
+3. [DAE 5.7] The yield of a chemical process is being studied. The two most
+important variables are thought to be pressure and temperature. Three levels of
+each factor are selected, and a factorial experiment with two replicates is
+performed. The yield data are as follows.
+
+```{r}
+chemical <- data.frame(
+  temperature = rep(c(150, 160, 170), each = 6),
+  pressure = rep(c(200, 215, 230), 6),
+  yield = c(90.4, 90.7, 90.2, 90.2, 90.6, 90.4,
+            90.1, 90.5, 89.9, 90.3, 90.6, 90.1, 
+            90.5, 90.8, 90.4, 90.7, 90.9, 90.1)
+)
+```
+
+a. Analyze the data and draw conclusions. Use $\alpha = 0.05$.
+
+```{r}
+fit <- lm(yield ~ pressure * temperature, data=chemical)
+summary(fit)
+anova(fit)
+```
+
+**Using an alpha value of 0.05, we see that the p-values for pressure, temperature, and their interactions are not significant. Therefore, we fail to reject the null hypothesis. There is not significant evidence to suggest that pressure, temperature, or an interaction between pressure and temperature significantly affect the yield.**
+
+b. Prepare appropriate residual plots and comment on the model's adequacy.
+
+```{r}
+plot(fit)
+```
+
+**This is not a good model because it basically violates all of the assumptions that you can find through plotting residuals besides that there do not appear to be any outliers.**
+
+c. Under what conditions would you operate this process?
+
+**We could operate this process if we normalized the data.**
+
+4. [DAE 5.26] An article in the IEEE Transactions on Electron Devices describes
+a study on polysilicon doping. The experiment shown below is a variation of
+their study. The response variable is base current.
+
+```{r}
+silicon <- data.frame(
+  ions = rep(1:2, each = 6),
+  temperature = rep(c(900, 950, 1000), 4),
+  current = c(4.6, 10.15, 11.01, 4.40, 10.2, 10.58, 
+              3.20, 9.38, 10.81, 3.50, 10.02, 10.6)
+)
+```
+
+a. Is there evidence (at $\alpha = 0.05$) indicating that either polysilicon
+doping level of anneal temperature affects base current?
+
+```{r}
+model2 = lm(current~ions*temperature, data = silicon)
+anova(model2)
+```
+
+**At an alpha level of 0.05, we we that the only significant factor is the temperature. Therefore, we fail to conclude that ions and the intereaction between ions and temperature significantly affect the current. We do, however, conclude that temperature has an affect on the current.**
+
+b. Prepare graphical displays to assist in interpreting this experiment.
+
+```{r}
+plot(model2)
+```
+
+
+c. Analyze the residuals and comment on model adequacy.
+
+**There is a clear trend in the residuals versus fitted, the qq plot is nowhere near a straight line, and there is still a trend in the scale-location plot. These point to this model not being adequate.**
+
+d. Is the model
+
+$$
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_{22}x^2_{2} + \beta_{12}x_{1}x_{2} + \epsilon
+$$
+supported by this experiment ($x_1$ is doping level and $x_{2}$ is temperature)?
+Estimate the parameters in this model and plot the response surface.
+
+```{r}
+fit <- lm(current ~ ions * poly(temperature, 2), data = silicon)
+surface <- expand.grid(
+  ions = unique(silicon$ions), 
+  temperature = unique(silicon$temperature)
+  )
+surface$current <- predict(fit, surface)
+
+ggplot() +
+  geom_point(data = silicon, aes(x = temperature, y = current)) +
+  geom_line(data = surface, aes(x = temperature, y = current)) +
+  facet_wrap(~ ions)
+```
+
+  
+5. Discussion of interaction terms.
+a. In your own words, explain what it means for there to be an interaction
+between two factors.
+
+**An interaction between two factors means that for each level of the first factor, its effect on the response variable is in part determined by the level of the second factor.**
+
+b. In your own words, explain what it means for there to be an interaction
+between three factors.
+
+**An interaction between three factors means that for each level of the first factor, its effect on the response variable is in part determined by the levels of the second and third factors.**
+
+c. In real experiments, what do you expect to be more common, two-way
+interactions or three-way interactions? Why? Note: you can argue either way, as
+long as it's well-justified. Contemplating this question will prepare you for
+fractional factorial designs.
+
+**I think that a two-way interaction would be more common because I know so many people that are really weird about having even numbers of variables and whatnot. I think that you would most likely either do interactions between two variables for simplicity or interactions between many variables to get a better picture. 3 just seems like an odd number to use.**
+
+## Feedback
+
+a. How much time did you spend on this homework?
+
+**About 3 hours**
+
+b. Which problem did you find most valuable?
+
+**I think having to use out own thoughts in question 5 is useful to get us to think about the concepts more in depth**
+
+## References
+
+[DAE] Montgomery, Douglas C. Design and analysis of experiments. John wiley &
+sons, 2017.

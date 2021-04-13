@@ -1,0 +1,73 @@
+ID,Speed,Age,Gender,Race,Major,Country,Paragraph,Time,Lyrics,Song,Delivery,Internet,Names,Repition
+1,38,20,M,White,Pharmacy,US,W,A,NL,4,P,N,Drew,1
+1,38,20,M,White,Pharmacy,US,T,A,L,5,P,N,Drew,2
+2,44,56,F,White,Accounting,US,W,A,L,5,V,N,mama brandt,1
+2,56,56,F,White,Accounting,US,T,A,NL,1,V,N,mama brandt,2
+3,18,58,M,White,Chemical Engineering,US,W,A,L,4,V,N,dad brandt,1
+3,22,58,M,White,Chemical Engineering,US,T,A,NL,3,V,N,dad brandt,2
+4,20,56,M,Asian,Electronic and Communication Engineering,India,T,A,NL,5,V,N,Prakash,1
+4,40,56,M,Asian,Electronic and Communication Engineering,India,W,A,L,1,V,N,Prakash,2
+5,61,20,F,Asian,Neuroscience,US,T,M,L,1,V,N,Anshika,1
+5,59,20,F,Asian,Neuroscience ,US,W,M,NL,2,V,N,Anshika,2
+6,38,53,F,White,Elemenatry education,US,T,A,NL,5,P,N,Drews Mama,1
+6,49,53,F,White,Elemenatry education,US,W,A,L,4,P,N,Drews Mama,2
+7,39,52,M,White,Archetechual design ,US,T,A,L,5,P,N,Drews Dad,1
+7,23,52,M,White,Archetechual design ,US,W,A,NL,1,P,N,Drews Dad,2
+8,59,20,F,White,"Economics, Psychology",Brazil,W,M,L,1,V,N,Julia,1
+8,66,20,F,White,"Economics, Psychology",Brazil,T,M,NL,5,V,N,Julia,2
+9,25,20,M,Asian,Computer Engineering,India,W,E,NL,3,V,N,Poorvesh,1
+9,24,20,M,Asian,Computer Engineering,India,T,E,L,5,V,N,Poorvesh,2
+10,73,20,F,Asian,Data Science,US,T,E,NL,4,V,N,Anisha,1
+10,80,20,F,Asian,Data Science,US,W,E,L,2,V,N,Anisha,2
+11,9,25,F,Asian,Culinary Arts,Canada,W,E,L,1,V,N,Apoo,1
+11,43,25,F,Asian,Culinary Arts,Canada,T,E,NL,3,V,N,Apoo,2
+12,43,26,M,Asian,Forestry ,Canada,W,E,NL,4,V,N,Ron,1
+12,32,26,M,Asian,Forestry ,Canada,T,E,L,3,V,N,Ron,2
+13,65,20,F,White,"Political Science, Sociology",US,W,M,NL,5,V,Y,Alli,1
+13,75,20,F,White,"Political Science, Sociology",US,T,M,L,2,V,N,Alli,2
+14,55,20,F,Asian,"Economics, Marketing",US,T,M,L,1,V,N,Shwetha,1
+14,80,20,F,Asian,"Economics, Marketing",US,W,M,NL,2,V,N,Shwetha,2
+15,67,20,M,White,Computer Sience,US,T,A,L,2,P,N,Eric,1
+15,67,20,M,White,Computer Sience,US,W,A,NL,1,P,N,Eric,2
+16,31,20,M,White,Biological systems engineering,US,W,A,L,3,P,N,Tim,1
+16,40,20,M,White,Biological systems engineering,US,T,A,NL,1,P,N,Tim,2
+17,76,20,M,White,Statistics,US,W,A,NL,2,P,N,Jack Owen,1
+17,80,20,M,White,Statistics,US,T,A,L,5,P,N,Jack Owen,2
+18,48,49,F,White,Accounting,US,T,A,NL,4,V,N,Katie,1
+18,51,49,F,White,Accounting,US,W,A,L,5,V,N,Katie,2
+19,58,51,M,White,"Mathmatics, Computer Science",US,W,A,NL,4,V,N,John,1
+19,59,51,M,White,"Mathmatics, Computer Science",US,T,A,L,1,V,N,John,2
+20,48,19,M,White,"Applied Math, Computer Science",US,T,A,L,4,V,N,Jack,1
+20,48,19,M,White,"Applied Math, Computer Science",US,W,A,NL,2,V,N,Jack,2
+21,62,23,F,White,Kinesiology,US,T,A,NL,4,V,N,Mikala,1
+21,63,23,F,White,Kinesiology,US,W,A,L,5,V,N,Mikala,2
+22,55,22,F,White,"Mathmatics, Statistics",US,W,E,L,2,P,N,Anna,1
+22,55,22,F,White,"Mathmatics, Statistics",US,T,E,NL,4,P,N,Anna,2
+23,52,27,M,White,Engineering Management,US,W,E,L,4,P,N,Cody,1
+23,55,27,M,White,Engineering Management,US,T,E,NL,5,P,N,Cody,2
+24,30,24,F,White,Communication Science and Disorders,US,W,E,NL,3,V,N,Elizabeth,1
+24,39,24,F,White,Communication Science and Disorders,US,T,E,L,4,V,N,Elizabeth,2
+25,37,22,M,White,Biology,US,W,E,L,3,V,N,Kevin,1
+25,51,22,M,White,Biology,US,T,E,NL,4,V,N,Kevin,2
+26,42,18,F,White,Business,US,T,E,L,5,V,N,Lizzy,1
+26,49,18,F,White,Business,US,W,E,NL,3,V,N,Lizzy,2
+27,57,22,F,White,Pyschology,US,T,E,NL,3,V,N,Sophia,1
+27,71,22,F,White,Pyschology,US,W,E,L,1,V,N,Sophia,2
+28,20,21,M,White,Psychology,US,W,M,NL,1,P,N,Matthew,1
+28,31,21,M,White,Psychology,US,T,M,L,2,P,N,Matthew,2
+29,28,20,F,White,Education,US,T,M,NL,3,V,N,Haley,1
+29,33,20,F,White,Education,US,W,M,L,4,V,N,Haley,2
+30,57,23,F,Hmong,C&E Sociology,US,T,A,L,1,V,N,Sophia Ly,1
+30,62,23,F,Hmong,C&E Sociology,US,W,A,NL,4,V,N,Sophia Ly,2
+31,72,24,F,White,Economics,US,T,A,NL,4,V,N,Michaella,1
+31,80,24,F,White,Economics,US,W,A,L,2,V,N,Michaella,2
+32,65,21,F,White,Political Science,US,W,A,L,5,V,N,Sydney,1
+32,67,21,F,White,Political Science,US,T,A,NL,3,V,N,Sydney,2
+33,65,20,F,White,Dance,US,T,A,L,1,V,N,Madeline,1
+33,61,20,F,White,Dance,US,W,A,NL,4,V,N,Madeline,2
+34,71,22,F,White,"Sociology, Statistics",US,T,A,NL,2,P,N,Madi,1
+34,70,22,F,White,"Sociology, Statistics",US,W,A,L,1,P,N,Madi,2
+35,49,21,F,White,"Statistics, Mathematics",US,T,A,NL,4,P,N,Juliana,1
+35,55,21,F,White,"Statistics, Mathematics",US,W,A,L,5,P,N,Juliana,2
+36,47,23,F,White,"Statictics, Mathematics",US,W,A,NL,3,P,N,Makayla,1
+36,47,23,F,White,"Statistics, Mathematics",US,T,A,L,5,P,N,Makayla,2

@@ -1,0 +1,60 @@
+---
+title: "Project Checkpoint 3"
+author: "Madi Polley"
+date: "12/1/2020"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To collect the data, 36 participants were contacted to take two typing tests either virtually or in person as social distancing procedures allowed. An introductory paragraph explaining how the typing tests worked was read to participants. Then, the randomized song either with or without lyrics was played and the participants started their first typing test. After a minute, their typing speed that was based both on speed and accuracy was revealed and recorded into an Excel spreadsheet. From there, a second test was administered with the second randomized song with either lyrics or no lyrics, the opposite of the first typing test. That score was recorded as well. After the tests, the participants were asked more questions such as their age, race, college major, gender, and native country, which were also recorded in the Excel document. We also recorded the mode of delivery, which was either virtual or in-person, time of day, and if we had any internet issues.This is identical to our original plan for the experimental process.
+
+To analyze the data, a 2^2 Factorial with blocking was used. The variables “ID”, “Paragraph”, and “Lyrics” were turned into factors, which were then used to create a linear model. This model included an intercept, whether the participant had music with or without lyrics, whether the participant had the Tigers in the Wild or the Wizard of Oz paragraph, and all of the ID factors. The initial model gave a multiple R-squared of 0.9059 and an adjusted R-squared of 0.8034, pointing to the model accounting for a high percentage of the data. The model also had a small p-value of 2.301e-09, which shows that the model is likely significant. The model also appears to pass the normality assumption, but the normal Q-Q plot is slightly S-shaped, meaning the data may need to be transformed. Though the model appears to be significant, the hypothesis proposed will likely be rejected. The “Lyrics” variable within the model has a p-value of 0.97, meaning it is not significant. The estimate for the variable is 0.05418 with a standard error of 1.8. This interval covers 0, showing that there is likely no significant difference between typing while listening to pop music with lyrics and typing while listening to pop music without lyrics. When an ANOVA test was run, the p-value for the “Lyrics” variable was 0.96, which shows this variable does not explain much of the variation in the data.
+	
+The plots given above appear to show relatively low variances between lyrics and no lyrics in each paragraph. There also seems to be a low variance between the two different paragraphs. As stated above, the model produced a p-value for the “Lyrics” variable of 0.97, which is not significant. This supports the assumptions that were drawn from the graphs above. We also do not see a significant difference in our model between the different paragraphs typed by our participants. The p-value for the model is 2.301e-09, as stated above, which shows that the model is significant. Since both the lyrics and paragraph variables are not significant in the model, the main effects come from the person to person variation. Based on these observations it appears that the proposed null hypothesis would not be rejected as we do not see a significant difference between typing speed with lyrics or no lyrics.
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(lattice)
+
+
+#reading our dataframe in
+data = read.csv("424 Project Data - Sheet1.csv")
+
+#ensuring the variables we are using are coded as factors
+data$ID = as.factor(data$ID)
+data$Paragraph = as.factor(data$Paragraph)
+data$Lyrics = as.factor((data$Lyrics))
+
+#Creating a plot to show our initial data
+ggplot(data) +
+  geom_point(aes(x = ID, y = Speed, col = Paragraph, shape = Lyrics, )) +
+  ggtitle("Typing Speed by Participant ID") +
+  theme(plot.title = element_text(size = 17)) +
+  theme(legend.title = element_text(size=17))
+
+
+#Creating a model using Lyrics and Paragraph as the effects
+#and adding in ID as a blocking variable
+model = lmer((Speed)~Lyrics*Paragraph+(1| ID), data=data)
+
+confint(model)[4:5,]
+
+#Checking the normality and significance of our model and
+#the variables of interest
+summary(model)
+anova(model)
+par(mfrow=c(3,1))
+plot(model)
+qqmath(model, main = "Q-Q Plot")
+plot(model, sqrt(abs(resid(.))) ~ fitted(.), type = c("p", "smooth"),  main = "Scale-Location Plot")
+```
